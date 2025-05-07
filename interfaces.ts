@@ -6,10 +6,17 @@ export interface Versions {
 }
 
 export interface BuilderConfig {
-  [category: string]: Array<{
-    gomod?: string
-    [key: string]: any
-  }>
+  // [category: string]: Array<{
+  //   gomod?: string
+  // [key: string]: any
+  dist?: Dist
+  receivers?: Array<{ gomod?: string }>
+  processors?: Array<{ gomod?: string }>
+  exporters?: Array<{ gomod?: string }>
+  connectors?: Array<{ gomod?: string }>
+  providers?: Array<{ gomod?: string }>
+  extensions?: Array<{ gomod?: string }>
+  replaces?: Array<{ gomod?: string }>
 }
 
 export interface ParsedData {
@@ -20,4 +27,12 @@ export interface ParsedData {
   connectors: string[] | undefined
   providers: string[] | undefined
   extensions: string[] | undefined
+}
+
+export interface Dist {
+  module?: string
+  name?: string
+  description?: string
+  version?: string
+  output_path?: string
 }

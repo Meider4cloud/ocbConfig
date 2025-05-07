@@ -3,8 +3,20 @@ import {
   parse as parseYaml,
   stringify as stringifyYaml,
 } from 'https://deno.land/std@0.200.0/yaml/mod.ts'
-import { BuilderConfig, ParsedData } from './interfaces.ts'
+import { BuilderConfig, Dist, ParsedData } from './interfaces.ts'
 import { logger } from './logger.ts'
+
+const modifyDist = (dist: Dist) => {
+  dist = {
+    module: Deno.env.get('DIST_MODULE') || dist.module,
+    name: Deno.env.get('DIST_NAME') || dist.name,
+    description: Deno.env.get('DIST_DESCRIPTION') || dist.description,
+    version: Deno.env.get('DIST_VERSION') || dist.version,
+    output_path: Deno.env.get('DIST_OUTPUT_PATH') || dist.output_path,
+  }
+  logger.debug(dist)
+  return dist
+}
 
 /**
  * Filters the contrib-builder-config.yaml file based on the parsed YAML information.
@@ -26,7 +38,8 @@ export function filterBuilderConfig(
       throw new Error('Invalid contrib-builder-config.yaml content')
     }
 
-    Object.keys(builderConfig).forEach((category) => {
+    Object.keys(builderConfig).forEach((type) => {
+      const category = type as keyof BuilderConfig
       // Skip filtering for 'dist' and 'providers' categories
       if (category === 'dist' || category === 'providers') {
         return
@@ -35,17 +48,9 @@ export function filterBuilderConfig(
       // Check if parsedData for the current category exists and is non-empty
       if (Array.isArray(parsedData[category])) {
         // Filter the builderConfig for the current category based on parsedData
-        builderConfig[category] = builderConfig[category].filter((item) => {
+        builderConfig[category] = builderConfig[category]?.filter((item) => {
           return parsedData[category]?.some((parsedItem) => {
             logger.debug(`Category: ${category}: Parsed Item: ${parsedItem}`)
-            // // Special case: Allow 'health_check' in parsedData to match 'healthcheck' in builderConfig
-            // if (
-            //   parsedItem === 'health_check' &&
-            //   item.gomod?.includes('healthcheck')
-            // ) {
-            //   return true
-            // }
-            // General case: Check if the parsed item is included in the gomod field
             return item.gomod?.includes(parsedItem)
           })
         })
@@ -57,7 +62,11 @@ export function filterBuilderConfig(
     })
 
     logger.debug(`Filtered builder-config.yaml content:`, builderConfig)
-    const yamlContent = stringifyYaml(builderConfig) // Convert the filtered config back to YAML
+
+    const dist = modifyDist(builderConfig.dist as Dist) // Modify the 'dist' section if needed
+    builderConfig.dist = dist // Update the 'dist' section in the builderConfig
+
+    const yamlContent = stringifyYaml(builderConfig as Record<string, unknown>) // Convert the filtered config back to YAML
     Deno.writeTextFileSync(outputPath, yamlContent) // Write the filtered YAML content to the output file
     logger.info(`Filtered builder-config.yaml has been saved to ${outputPath}`)
   } catch (error: unknown) {
