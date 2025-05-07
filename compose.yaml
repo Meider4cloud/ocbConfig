@@ -9,4 +9,9 @@ services:
     volumes:
       - .:/app
     command: ['deno', 'task', 'prod']
-
+    environment:
+      # - DIST_MODULE=
+      - DIST_NAME="Hello World"
+      # - DIST_DESCRIPTION=
+      # - DIST_VERSION=
+      # - DIST_OUTPUT_PATH=
