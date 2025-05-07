@@ -10,7 +10,7 @@ await log.setup({
   },
   loggers: {
     default: {
-      level: 'DEBUG',
+      level: 'INFO',
       handlers: ['console'],
     },
   },
