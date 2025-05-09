@@ -1,4 +1,3 @@
-//import { readTextFileSync, writeTextFileSync } from "https://deno.land/std@0.200.0/fs/mod.ts";
 import {
   parse as parseYaml,
   stringify as stringifyYaml,

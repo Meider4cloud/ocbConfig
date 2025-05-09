@@ -1,5 +1,5 @@
 import { parse } from 'https://deno.land/std@0.200.0/yaml/mod.ts'
-// import { ParsedData } from './interfaces.ts'
+import { ParsedData } from './interfaces.ts'
 import { logger } from './logger.ts'
 
 /**
@@ -7,15 +7,6 @@ import { logger } from './logger.ts'
  * @param {string} filePath - The path to the YAML file.
  * @returns {ParsedData} - The parsed data from the YAML file.
  */
-
-export interface ParsedData {
-  receivers: Record<string, any>
-  processors: Record<string, any>
-  exporters: Record<string, any>
-  connectors: Record<string, any>
-  providers: Record<string, any>
-  extensions: Record<string, any>
-}
 
 const allowedKeys: (keyof ParsedData)[] = [
   'receivers',
@@ -73,7 +64,7 @@ const keepKeys = (filteredData: Partial<ParsedData>) => {
   }
 
   for (const group of allowedKeys) {
-    const keys = extractOwnKeys(filteredData[group])
+    const keys = filteredData[group] ? extractOwnKeys(filteredData[group]) : []
     logger.debug(`Keys for ${group}: ${keys}`)
     filteredData[group] = keys as any // if needed, cast depending on filteredData type
   }
