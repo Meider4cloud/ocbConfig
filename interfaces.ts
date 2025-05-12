@@ -25,7 +25,7 @@ export interface ParsedData {
   processors: string[] | undefined //| Record<string | number | symbol, never>
   exporters: string[] | undefined
   connectors: string[] | undefined
-  providers: string[] | undefined
+  providers?: string[] | undefined
   extensions: string[] | undefined
 }
 
@@ -36,3 +36,12 @@ export interface Dist {
   version?: string
   output_path?: string
 }
+
+// export interface ParsedData {
+//   receivers: Record<string, any>
+//   processors: Record<string, any>
+//   exporters: Record<string, any>
+//   connectors: Record<string, any>
+//   providers: Record<string, any>
+//   extensions: Record<string, any>
+// }

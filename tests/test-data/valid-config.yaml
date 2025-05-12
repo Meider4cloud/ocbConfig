@@ -1,0 +1,114 @@
+# Contrib collector version 0.88.0 >> important for routing connector
+extensions:
+  health_check:
+    endpoint: localhost:13133
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: localhost:4317
+      http:
+        endpoint: localhost:4318
+processors:
+  transform:
+      error_mode: ignore
+      log_statements:
+        - context: log
+          statements:
+          - truncate_all(log.attributes,  4090)
+          - delete_key(log.attributes, "exception.stacktrace")
+      trace_statements:
+        - context: span
+          statements:
+          - truncate_all(span.attributes,  4090 )
+        - context: resource
+          statements:
+          - truncate_all(resource.attributes,  4090)
+        - context: scope
+          statements:
+          - truncate_all(scope.attributes,  4090)
+        - context: spanevent
+          statements:
+          - truncate_all(spanevent.attributes,  4090 )
+  batch:
+  tail_sampling:
+    decision_wait: 10s
+    num_traces: 100
+    expected_new_traces_per_sec: 10
+    policies:
+      [
+        {
+          name: errors-policy,
+          type: status_code,
+          status_code: {status_codes: [ERROR]}
+        },
+        {
+          name: randomized-policy,
+          type: probabilistic,
+          probabilistic: {sampling_percentage: 25}
+        },
+      ]
+  filter/drop_metrics:
+    error_mode: ignore
+    metrics:
+      metric:
+          - 'name == "http.server.duration"'
+          - 'name == "http.client.duration"'
+connectors:
+  routing:
+    default_pipelines:
+      - traces/sample
+    error_mode: ignore
+    table:
+      # - statement: route() where attributes["otel.trace_id"] != ""
+      #   pipelines: [traces/sample]
+      #! Used in contrib 1.121.0
+      - condition: attributes["otel.trace_id"] != ""
+        pipelines: [traces/sample]
+        context: resource
+  spanmetrics:
+    histogram:
+      exponential:
+        max_size: 160
+    dimensions:
+      - name: http.method
+        default: GET
+      - name: http.status_code
+      - name: http.client_ip
+      - name: http.route
+      - name: http.server.duration
+      - name: http.target
+      - name: net.host.name
+    dimensions_cache_size: 1000
+    aggregation_temporality: "AGGREGATION_TEMPORALITY_DELTA"
+    metrics_flush_interval: 30s
+exporters:
+  debug:
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [transform]
+      exporters: [routing, spanmetrics]
+    traces/sample:
+      receivers: [routing]
+      processors: [tail_sampling, batch]
+      exporters: [debug ]
+    logs:
+      receivers: [otlp]
+      processors: [transform, batch]
+      exporters: [debug]
+    metrics:
+      receivers: [otlp, spanmetrics]
+      processors: [filter/drop_metrics, batch]
+      exporters: [debug]
+  telemetry:
+    logs:
+      level: info
+    metrics:
+      address: localhost:8888
+  extensions: [health_check]
+
+
+
+
