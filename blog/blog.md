@@ -33,7 +33,7 @@ I started to build the builder-config.yaml manually. I used the OCB documentatio
 
 Then I needed to find the go module for them and the version I intended to use. Yes the version matters. Also you define the version of the builder itself at the beginning of the file, not all components follow that version.
 
-After several error during building and poking through the repos of the contrib and core collector, I understood that for most components the version is the beta version (for example, 0.123.0) but some components had stable versions (for example, 1.131.1).
+After several error during building and poking through the repos of the contrib and core collector, I understood that for most components the version is the beta version (for example, 0.123.0) but some components had stable versions (for example, 1.31.1).
 
 Finally I was able to successfully build my first custom collector. That process is painful and time consuming. It will be a struggle to maintain and new engineers will have a hard time to understand the process. I would not recommend this approach for a production environment.
 

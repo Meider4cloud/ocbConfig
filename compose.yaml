@@ -1,6 +1,5 @@
-version: '3.8'
 services:
-  app:
+  ocbconfig:
     build:
       context: .
       dockerfile: Dockerfile
@@ -11,7 +10,7 @@ services:
     command: ['deno', 'task', 'prod']
     environment:
       # - DIST_MODULE=
-      - DIST_NAME="Hello World"
-      # - DIST_DESCRIPTION=
+      - DIST_NAME="Hello ocbConfig"
+      - DIST_DESCRIPTION="OpenTelemetry Collector, build with the help of ocbConfig"
       # - DIST_VERSION=
       # - DIST_OUTPUT_PATH=
